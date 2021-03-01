@@ -9,6 +9,4 @@ robotConnecter.stdin.flush()
 getContents = str(subprocess.check_output("open"))
 getContents = re.findall()
 
-robotConnecter = subprocess.Popen("open")
-robotConnecter.communicate(input='')
 pythonExecuter = subprocess.Popen("co")
