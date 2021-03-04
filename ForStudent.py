@@ -1,6 +1,7 @@
 import sys, sqlite3, os
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
+from PyQt5 import QtCore
 from PyQt5.QtGui import *
 
 mainScreen = uic.loadUiType("ui/main.ui")[0]
@@ -52,21 +53,25 @@ class SplitGradeClass(QDialog):
         self.displayer.setText(out)
 
 class CalculatorClass(QDialog):
-    global settingName
-    def __init__(self,parent):        
+    def __init__(self,parent):
         super(CalculatorClass,self).__init__(parent)
         uic.loadUi("ui/calculator.ui", self)
         self.setWindowIcon(QIcon("image/icon.png"))
-        
-        #sqlite
+        self.loadDB()
+
+        self.ok.clicked.connect(self.calculate)
+        self.settingSubject.clicked.connect(self.openSettingSubject)
+        self.loadSetting.clicked.connect(self.openLoadSetting)
+        self.show()
+    
+    def loadDB(self):
         setting = sqlite3.connect(f'settings/{settingName}.db')
         remoter = setting.cursor()
         self.subject = {}
-        for row in remoter.execute('SELECT * FROM stocks'):
+        for row in remoter.execute(f'SELECT * FROM "{settingName}"'):
             self.subject[row[0]] = row[1]
         self.subjectList = list(self.subject.keys())
-
-        #pyqt
+        self.displaySubject.clearContents()
         self.displaySubject.setRowCount(len(self.subjectList))
         for i in range(len(self.subjectList)):
             self.displaySubject.setItem(i,0,QTableWidgetItem(f'{self.subjectList[i]}({self.subject[self.subjectList[i]]})'))
@@ -74,16 +79,14 @@ class CalculatorClass(QDialog):
             spinBox.setMinimum(1)
             spinBox.setMaximum(9)
             self.displaySubject.setCellWidget(i,1,spinBox)
-        self.ok.clicked.connect(self.calculate)
-        self.settingSubject.clicked.connect(self.openSettingSubject)
-        self.loadSetting.clicked.connect(self.openLoadSetting)
-        self.show()
-    
+
     def openSettingSubject(self):
         SettingSubjectClass(self)
     
     def openLoadSetting(self):
-        LoadSettingClass(self)
+        dlg = LoadSettingClass(self)
+        dlg.exec_()
+        self.loadDB()
 
     def calculate(self):
         adder = [0,0]
@@ -96,21 +99,52 @@ class SettingSubjectClass(QDialog):
     def __init__(self,parent):
         super(SettingSubjectClass,self).__init__(parent)
         uic.loadUi("ui/settingSubject.ui", self)
-        for i in range(len(self.subjectList)):
-            self.displaySubject.setItem(i,0,QTableWidgetItem(f'{self.subjectList[i]}({self.subject[self.subjectList[i]]})'))
-            spinBox = QSpinBox(self)
-            spinBox.setMinimum(1)
-            spinBox.setMaximum(9)
-            self.displaySubject.setCellWidget(i,1,spinBox)
         self.setWindowIcon(QIcon("image/icon.png"))
+        self.add.clicked.connect(self.addSubject)
+        self.subjectDelete.clicked.connect(self.delSubject)
+        self.subjectNameInput.returnPressed.connect(self.addSubject)
+        self.save.clicked.connect(self.saveSetting)
         self.show()
+
+    def addSubject(self):
+        self.subjectDisplay.setRowCount(self.subjectDisplay.rowCount()+1)
+        self.subjectDisplay.setItem(self.subjectDisplay.rowCount()-1,0,QTableWidgetItem(str(self.subjectNameInput.text())))
+        self.subjectDisplay.setItem(self.subjectDisplay.rowCount()-1,1,QTableWidgetItem(str(self.weight.value())))
+    
+    def delSubject(self):
+        self.subjectDisplay.removeRow(self.subjectDisplay.currentRow())
+    
+    def saveSetting(self):
+        setting = sqlite3.connect(f'settings/{self.settingNameInput.text()}.db')
+        remoter = setting.cursor()
+        remoter.execute(f'''CREATE TABLE "{self.settingNameInput.text()}" (
+            "name" TEXT, "weight" INTEGER)''')
+        for i in range(self.subjectDisplay.rowCount()):
+            remoter.execute(f'INSERT INTO "{self.settingNameInput.text()}" VALUES ("{self.subjectDisplay.item(i, 0).text()}",{self.subjectDisplay.item(i, 1).text()})')
+        setting.commit()
+        setting.close()
 
 class LoadSettingClass(QDialog):
     def __init__(self,parent):
+        self.emitter = None
         super(LoadSettingClass,self).__init__(parent)
         uic.loadUi("ui/loadSubject.ui", self)
         self.setWindowIcon(QIcon("image/icon.png"))
         self.show()
+        self.refindDirs = []
+        dirs = os.listdir('settings')
+        for i in range(len(dirs)):
+            arrDirs = dirs[i].split('.')
+            if arrDirs[-1] == "db":
+                del arrDirs[-1]
+                self.displaySubject.addItem('.'.join(arrDirs))
+                self.refindDirs.append('.'.join(arrDirs))
+        self.load.clicked.connect(self.closer)
+
+    def closer(self):
+        global settingName
+        settingName = self.refindDirs[self.displaySubject.currentRow()]
+        self.close()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv) 

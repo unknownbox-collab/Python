@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>settingSubject</class>
+ <widget class="QDialog" name="settingSubject">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,16 +13,6 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QTableView" name="displaySubject">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>401</width>
-     <height>201</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="add">
    <property name="geometry">
     <rect>
@@ -74,6 +64,9 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="minimum">
+    <number>1</number>
+   </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
@@ -106,7 +99,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="del">
+  <widget class="QPushButton" name="subjectDelete">
    <property name="geometry">
     <rect>
      <x>290</x>
@@ -148,7 +141,7 @@
     <string>세팅 저장</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="subjectNameInput_2">
+  <widget class="QLineEdit" name="settingNameInput">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -158,7 +151,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>세팅 이름</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="message">
@@ -171,8 +164,43 @@
     </rect>
    </property>
    <property name="text">
-    <string>TextLabel</string>
+    <string/>
    </property>
+  </widget>
+  <widget class="QTableWidget" name="subjectDisplay">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>401</width>
+     <height>192</height>
+    </rect>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="dragEnabled">
+    <bool>true</bool>
+   </property>
+   <property name="dragDropMode">
+    <enum>QAbstractItemView::DragDrop</enum>
+   </property>
+   <property name="selectionMode">
+    <enum>QAbstractItemView::SingleSelection</enum>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <column>
+    <property name="text">
+     <string>과목</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>단위</string>
+    </property>
+   </column>
   </widget>
  </widget>
  <resources/>
